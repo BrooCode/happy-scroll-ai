@@ -1,0 +1,1 @@
+"""HappyScroll API Application."""
