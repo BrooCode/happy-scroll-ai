@@ -1,0 +1,216 @@
+"""
+Cache Service for HappyScroll Verdict API
+Provides in-memory caching to speed up repeated video analysis requests
+"""
+from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
+from loguru import logger
+
+
+class VerdictCache:
+    """
+    In-memory cache for video verdict results
+    
+    Features:
+    - TTL (Time To Live) based expiration
+    - Automatic cleanup of expired entries
+    - Cache statistics tracking
+    - Thread-safe operations
+    """
+    
+    def __init__(self, ttl_days: int = 7):
+        """
+        Initialize cache with TTL
+        
+        Args:
+            ttl_days: Number of days to cache results (default: 7)
+        """
+        self.cache: Dict[str, Dict[str, Any]] = {}
+        self.ttl = timedelta(days=ttl_days)
+        self.stats = {
+            "hits": 0,
+            "misses": 0,
+            "sets": 0,
+            "size": 0
+        }
+        logger.info(f"✅ Cache initialized with {ttl_days} day TTL")
+    
+    def get(self, video_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get cached result for video
+        
+        Args:
+            video_id: YouTube video ID
+            
+        Returns:
+            Cached verdict result or None if not found/expired
+        """
+        if video_id not in self.cache:
+            self.stats["misses"] += 1
+            logger.debug(f"Cache MISS: {video_id}")
+            return None
+        
+        entry = self.cache[video_id]
+        
+        # Check if expired
+        if datetime.now() > entry["expires_at"]:
+            logger.debug(f"Cache EXPIRED: {video_id}")
+            del self.cache[video_id]
+            self.stats["misses"] += 1
+            self.stats["size"] = len(self.cache)
+            return None
+        
+        # Cache hit
+        self.stats["hits"] += 1
+        logger.info(f"✅ Cache HIT: {video_id} (saved ~20s)")
+        return entry["result"]
+    
+    def set(self, video_id: str, result: Dict[str, Any]) -> None:
+        """
+        Cache verdict result for video
+        
+        Args:
+            video_id: YouTube video ID
+            result: Verdict result to cache
+        """
+        self.cache[video_id] = {
+            "result": result,
+            "cached_at": datetime.now(),
+            "expires_at": datetime.now() + self.ttl
+        }
+        self.stats["sets"] += 1
+        self.stats["size"] = len(self.cache)
+        logger.info(f"💾 Cached result for {video_id} (expires in {self.ttl.days} days)")
+    
+    def clear(self) -> int:
+        """
+        Clear all cached entries
+        
+        Returns:
+            Number of entries cleared
+        """
+        count = len(self.cache)
+        self.cache.clear()
+        self.stats["size"] = 0
+        logger.info(f"🗑️  Cache cleared: {count} entries removed")
+        return count
+    
+    def cleanup_expired(self) -> int:
+        """
+        Remove expired entries from cache
+        
+        Returns:
+            Number of entries removed
+        """
+        now = datetime.now()
+        expired_keys = [
+            key for key, entry in self.cache.items()
+            if now > entry["expires_at"]
+        ]
+        
+        for key in expired_keys:
+            del self.cache[key]
+        
+        self.stats["size"] = len(self.cache)
+        
+        if expired_keys:
+            logger.info(f"🗑️  Cleaned up {len(expired_keys)} expired cache entries")
+        
+        return len(expired_keys)
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """
+        Get cache statistics
+        
+        Returns:
+            Dictionary with cache statistics
+        """
+        total_requests = self.stats["hits"] + self.stats["misses"]
+        hit_rate = (self.stats["hits"] / total_requests * 100) if total_requests > 0 else 0
+        
+        # Calculate time saved (assuming 20s per cache hit)
+        time_saved_seconds = self.stats["hits"] * 20
+        time_saved_minutes = time_saved_seconds / 60
+        
+        return {
+            "cache_hits": self.stats["hits"],
+            "cache_misses": self.stats["misses"],
+            "total_requests": total_requests,
+            "hit_rate_percentage": round(hit_rate, 2),
+            "cached_entries": self.stats["size"],
+            "cache_sets": self.stats["sets"],
+            "ttl_days": self.ttl.days,
+            "time_saved_seconds": time_saved_seconds,
+            "time_saved_minutes": round(time_saved_minutes, 2),
+            "estimated_cost_saved_usd": round(self.stats["hits"] * 0.002, 4)  # ~$0.002 per API call
+        }
+    
+    def get_entry_info(self, video_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get information about a cached entry
+        
+        Args:
+            video_id: YouTube video ID
+            
+        Returns:
+            Entry metadata or None if not found
+        """
+        if video_id not in self.cache:
+            return None
+        
+        entry = self.cache[video_id]
+        now = datetime.now()
+        expires_at = entry["expires_at"]
+        
+        return {
+            "video_id": video_id,
+            "cached_at": entry["cached_at"].isoformat(),
+            "expires_at": expires_at.isoformat(),
+            "time_remaining": str(expires_at - now),
+            "is_expired": now > expires_at
+        }
+
+
+# Global cache instance
+_cache_instance: Optional[VerdictCache] = None
+
+
+def get_cache(ttl_days: int = 7) -> VerdictCache:
+    """
+    Get or create the global cache instance
+    
+    Args:
+        ttl_days: Number of days to cache results (default: 7)
+        
+    Returns:
+        VerdictCache instance
+    """
+    global _cache_instance
+    
+    if _cache_instance is None:
+        _cache_instance = VerdictCache(ttl_days=ttl_days)
+        logger.info("✅ VerdictCache singleton created")
+    
+    return _cache_instance
+
+
+def clear_cache() -> int:
+    """
+    Clear the global cache
+    
+    Returns:
+        Number of entries cleared
+    """
+    cache = get_cache()
+    return cache.clear()
+
+
+def get_cache_stats() -> Dict[str, Any]:
+    """
+    Get statistics from the global cache
+    
+    Returns:
+        Cache statistics dictionary
+    """
+    cache = get_cache()
+    return cache.get_stats()

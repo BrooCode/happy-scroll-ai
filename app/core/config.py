@@ -41,6 +41,12 @@ class Settings(BaseSettings):
         description="YouTube Data API key for fetching video metadata and captions"
     )
     
+    # Redis Configuration
+    redis_url: str = Field(
+        default="",
+        description="Redis connection URL for caching (e.g., redis://host:port or redis://user:pass@host:port)"
+    )
+    
     # Application Environment
     app_env: Literal["dev", "prod"] = "dev"
     
