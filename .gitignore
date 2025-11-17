@@ -29,6 +29,12 @@ ENV/
 # Environment Variables
 .env
 
+# Google Cloud Credentials
+credentials/
+service-account-key.json
+*.json
+!package.json
+
 # IDE
 .vscode/
 .idea/

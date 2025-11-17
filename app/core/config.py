@@ -5,6 +5,7 @@ Loads and validates environment variables.
 import os
 from typing import Literal
 from pydantic_settings import BaseSettings
+from pydantic import Field
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -14,8 +15,31 @@ load_dotenv()
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     
-    # OpenAI Configuration
-    openai_api_key: str
+    # Google Cloud Configuration
+    google_application_credentials: str = Field(
+        default="",
+        description="Path to Google Cloud service account JSON key file"
+    )
+    google_cloud_project: str = Field(
+        default="",
+        description="Google Cloud project ID"
+    )
+    safety_threshold: str = Field(
+        default="POSSIBLE",
+        description="Safety threshold: UNKNOWN, VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY"
+    )
+    
+    # Gemini AI Configuration
+    gemini_api_key: str = Field(
+        default="",
+        description="Google Gemini AI API key for content analysis"
+    )
+    
+    # YouTube Data API Configuration
+    youtube_api_key: str = Field(
+        default="",
+        description="YouTube Data API key for fetching video metadata and captions"
+    )
     
     # Application Environment
     app_env: Literal["dev", "prod"] = "dev"

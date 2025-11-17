@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.logger import logger, setup_logging
-from app.routes import moderation
+from app.routes import moderation, video_analysis
 
 # Set up logging
 setup_logging()
@@ -33,6 +33,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(moderation.router)
+app.include_router(video_analysis.router)
 
 
 @app.on_event("startup")

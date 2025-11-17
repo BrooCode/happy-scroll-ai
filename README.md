@@ -1,16 +1,20 @@
 # HappyScroll Moderation API
 
-AI-powered content moderation backend for the HappyScroll Chrome extension. This API uses OpenAI's moderation endpoint to analyze and filter unsafe content in short-form videos.
+AI-powered content moderation backend for the HappyScroll Chrome extension. This API uses **Google Cloud Vision API** with SafeSearch detection to analyze and filter unsafe content in short-form videos.
+
+> **🔄 Recently Migrated**: This project has been migrated from OpenAI to Google Cloud Vision for better performance, reliability, and cost-effectiveness. See [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) for details.
 
 ## Features
 
 - 🚀 **FastAPI Framework** - Modern, fast web framework with automatic API documentation
-- 🤖 **OpenAI Integration** - Uses `omni-moderation-latest` model for content analysis
+- 🔍 **Google Cloud Vision** - SafeSearch API for image content analysis
+- 🎯 **Configurable Safety** - Adjustable safety thresholds for different audiences
 - 🔒 **CORS Support** - Configured for Chrome extension requests
 - 📝 **Type Safety** - Full type hints with Pydantic models
 - 📊 **Structured Logging** - Enhanced logging with Loguru
 - 🐳 **Docker Support** - Containerized deployment ready
 - ✅ **Health Checks** - Built-in health monitoring endpoints
+- 💰 **Free Tier** - 1,000 moderations/month free with Google Cloud
 
 ## Project Structure
 
@@ -18,112 +22,177 @@ AI-powered content moderation backend for the HappyScroll Chrome extension. This
 happy-scroll-ai/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py                    # FastAPI application entry point
+│   ├── main.py                       # FastAPI application entry point
 │   ├── core/
 │   │   ├── __init__.py
-│   │   ├── config.py              # Environment configuration
-│   │   └── logger.py              # Logging setup
+│   │   ├── config.py                 # Environment configuration
+│   │   └── logger.py                 # Logging setup
 │   ├── models/
 │   │   ├── __init__.py
-│   │   └── moderation_request.py  # Pydantic models
+│   │   └── moderation_request.py     # Pydantic models
 │   ├── routes/
 │   │   ├── __init__.py
-│   │   └── moderation.py          # API endpoints
+│   │   └── moderation.py             # API endpoints
 │   └── services/
 │       ├── __init__.py
-│       └── openai_service.py      # OpenAI API integration
+│       ├── google_vision_service.py  # Google Cloud Vision integration
+│       └── google_video_service.py   # Google Video Intelligence (optional)
 ├── tests/
 │   ├── __init__.py
-│   └── test_moderation.py         # Unit tests
-├── .env.example                    # Environment variables template
+│   └── test_moderation.py            # Unit tests
+├── credentials/
+│   └── .gitkeep                      # Place service account key here
+├── .env.example                       # Environment variables template
 ├── .gitignore
 ├── Dockerfile
 ├── Makefile
 ├── README.md
-└── requirements.txt
+├── GOOGLE_CLOUD_SETUP.md              # Setup guide for Google Cloud
+├── MIGRATION_GUIDE.md                 # Migration from OpenAI guide
+├── requirements.txt
+└── test_google_vision.py              # Test script for Google Cloud
 ```
 
 ## Prerequisites
 
 - Python 3.11+
-- OpenAI API key
+- Google Cloud account with Vision API enabled
+- Service account JSON key
 - pip or Docker
 
 ## Quick Start
 
-### 1. Clone and Setup
+### 1. Setup Google Cloud
 
-```bash
-cd happy-scroll-ai
-```
+⚠️ **Important**: Before running the API, you must set up Google Cloud Vision API.
+
+📖 **Detailed instructions**: See [GOOGLE_CLOUD_SETUP.md](GOOGLE_CLOUD_SETUP.md)
+
+**Quick steps**:
+1. Create Google Cloud project
+2. Enable Vision API
+3. Create service account & download JSON key
+4. Place key in `credentials/service-account-key.json`
 
 ### 2. Create Virtual Environment
 
-```bash
+```powershell
 python -m venv venv
 .\venv\Scripts\activate  # Windows PowerShell
 ```
 
 ### 3. Install Dependencies
 
-```bash
+```powershell
 pip install -r requirements.txt
 ```
 
 ### 4. Configure Environment
 
-Copy `.env.example` to `.env` and add your OpenAI API key:
+Copy `.env.example` to `.env` and configure:
 
-```bash
+```powershell
 copy .env.example .env
 ```
 
 Edit `.env`:
 ```env
-OPENAI_API_KEY=sk-your-actual-api-key-here
+# Google Cloud Configuration
+GOOGLE_APPLICATION_CREDENTIALS=d:\happy-scroll-ai\credentials\service-account-key.json
+GOOGLE_CLOUD_PROJECT=your-project-id-here
+
+# Safety Threshold (UNKNOWN, VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY)
+SAFETY_THRESHOLD=POSSIBLE
+
+# Application
 APP_ENV=dev
 PORT=8000
 ```
 
-### 5. Run the Application
+### 5. Test Google Cloud Setup
 
-```bash
+```powershell
+python test_google_vision.py
+```
+
+This will verify your credentials and test the Vision API.
+
+### 6. Run the Application
+
+```powershell
 uvicorn app.main:app --reload
 ```
 
 Or use the Makefile:
-```bash
+```powershell
 make dev
 ```
 
 The API will be available at:
 - **API**: http://localhost:8000
-- **Docs**: http://localhost:8000/docs
+- **Docs**: http://localhost:8000/docs (Interactive API documentation)
 - **ReDoc**: http://localhost:8000/redoc
 
 ## API Usage
 
-### Moderate Content
+### Moderate Image Content
 
 **Endpoint**: `POST /api/moderate`
 
 **Request**:
 ```json
 {
-  "content": "Text content to moderate"
+  "image_url": "https://i.ytimg.com/vi/VIDEO_ID/maxresdefault.jpg"
 }
 ```
 
 **Response**:
 ```json
 {
-  "safe": false,
-  "categories": ["violence", "hate"],
-  "category_scores": {
-    "violence": 0.95,
-    "hate": 0.78,
-    "sexual": 0.01
-  }
+  "allowed": true,
+  "safe": true,
+  "categories": {
+    "adult": false,
+    "violence": false,
+    "racy": false,
+    "medical": false,
+    "spoof": false
+  },
+  "likelihood_scores": {
+    "adult": "VERY_UNLIKELY",
+    "violence": "UNLIKELY",
+    "racy": "VERY_UNLIKELY",
+    "medical": "UNLIKELY",
+    "spoof": "VERY_UNLIKELY"
+  },
+  "threshold": "POSSIBLE",
+  "service": "google_cloud_vision"
+}
+```
+
+### Example: Test with PowerShell
+
+```powershell
+$body = @{
+    image_url = "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri "http://localhost:8000/api/moderate" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body $body
+```
+
+### Moderate Video (Optional)
+
+**Endpoint**: `POST /api/moderate/video`
+
+**Note**: Video analysis is slow (1-5 minutes) and requires videos in Google Cloud Storage.
+
+**Request**:
+```json
+{
+  "video_uri": "gs://your-bucket/video.mp4"
 }
 ```
 
@@ -187,27 +256,37 @@ make docker-run
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 4. **Add Environment Variables**:
-   - `OPENAI_API_KEY`: Your OpenAI API key
+   - `GOOGLE_APPLICATION_CREDENTIALS`: Upload JSON key as secret file
+   - `GOOGLE_CLOUD_PROJECT`: Your project ID
+   - `SAFETY_THRESHOLD`: `POSSIBLE`
    - `APP_ENV`: `prod`
-5. **Deploy**
+5. **Upload service account JSON** as secret file
+6. **Deploy**
 
 ### Deploy to Railway
 
 1. **Create New Project** on [Railway](https://railway.app)
 2. **Deploy from GitHub**
 3. **Add Environment Variables**:
-   - `OPENAI_API_KEY`: Your OpenAI API key
+   - `GOOGLE_APPLICATION_CREDENTIALS`: `/app/credentials/service-account-key.json`
+   - `GOOGLE_CLOUD_PROJECT`: Your project ID
+   - `SAFETY_THRESHOLD`: `POSSIBLE`
    - `APP_ENV`: `prod`
    - `PORT`: `8000`
-4. **Railway will auto-detect** the Dockerfile and deploy
+4. **Upload service account JSON** to `/app/credentials/`
+5. **Railway will auto-detect** the Dockerfile and deploy
 
 ### Environment Variables for Production
 
 ```env
-OPENAI_API_KEY=sk-your-production-key
+GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/service-account-key.json
+GOOGLE_CLOUD_PROJECT=your-production-project-id
+SAFETY_THRESHOLD=POSSIBLE
 APP_ENV=prod
 PORT=8000
 ```
+
+**Security Note**: Never commit service account keys to Git. Use environment variables or secret management services.
 
 ## Development
 
@@ -259,7 +338,10 @@ make lint
 All dependencies are pinned for reproducible builds:
 - `fastapi` - Web framework
 - `uvicorn` - ASGI server
-- `openai` - OpenAI API client
+- `google-cloud-vision` - Google Cloud Vision API client
+- `google-cloud-videointelligence` - Video analysis (optional)
+- `pillow` - Image processing
+- `aiohttp` - Async HTTP client for image downloads
 - `python-dotenv` - Environment variable management
 - `pydantic` - Data validation
 - `loguru` - Enhanced logging
@@ -293,20 +375,32 @@ Logs are written to:
 
 ### Common Issues
 
-1. **ModuleNotFoundError: No module named 'pydantic_settings'**
-   ```bash
-   pip install pydantic-settings
+1. **"Could not load credentials"**
+   - Check `GOOGLE_APPLICATION_CREDENTIALS` path in `.env`
+   - Verify JSON key file exists at that path
+   - Run `python test_google_vision.py` to diagnose
+
+2. **"Vision API has not been enabled"**
+   - Go to https://console.cloud.google.com/apis/library/vision.googleapis.com
+   - Click "Enable"
+   - Wait 1-2 minutes and try again
+
+3. **"Permission denied"**
+   - Verify service account has role: `Cloud Vision AI Service Agent`
+   - Check IAM permissions in Google Cloud Console
+
+4. **ModuleNotFoundError: No module named 'google.cloud'**
+   ```powershell
+   pip install -r requirements.txt
    ```
 
-2. **OpenAI API Key Error**
-   - Verify `.env` file exists with correct `OPENAI_API_KEY`
-   - Ensure key starts with `sk-`
-
-3. **Port Already in Use**
-   ```bash
+5. **Port Already in Use**
+   ```powershell
    # Change PORT in .env or run on different port
    uvicorn app.main:app --port 8001
    ```
+
+For detailed troubleshooting, see [GOOGLE_CLOUD_SETUP.md](GOOGLE_CLOUD_SETUP.md#-troubleshooting).
 
 ## Security Notes
 
@@ -320,13 +414,33 @@ Logs are written to:
 
 MIT License - see LICENSE file for details
 
+## Documentation
+
+- 📖 **[Google Cloud Setup Guide](GOOGLE_CLOUD_SETUP.md)** - Complete setup instructions
+- 🔄 **[Migration Guide](MIGRATION_GUIDE.md)** - Migrating from OpenAI to Google Cloud
+- 🧪 **[Test Script](test_google_vision.py)** - Verify your setup
+
+## Pricing
+
+**Google Cloud Vision API**:
+- **First 1,000 images/month**: FREE ✨
+- **1,001 - 5,000,000**: $1.50 per 1,000 images
+- **5,000,001+**: $0.60 per 1,000 images
+
+**Example costs**:
+- 10,000 moderations = ~$15/month
+- 100,000 moderations = ~$150/month
+
+Much more cost-effective than OpenAI for high-volume image moderation!
+
 ## Support
 
 For issues and questions:
 - Open an issue on GitHub
 - Check the [FastAPI documentation](https://fastapi.tiangolo.com/)
-- Review [OpenAI API docs](https://platform.openai.com/docs/)
+- Review [Google Cloud Vision docs](https://cloud.google.com/vision/docs)
+- See [GOOGLE_CLOUD_SETUP.md](GOOGLE_CLOUD_SETUP.md) for setup help
 
 ---
 
-Built with ❤️ for HappyScroll Chrome Extension
+Built with ❤️ for HappyScroll Chrome Extension | Powered by Google Cloud Vision AI
