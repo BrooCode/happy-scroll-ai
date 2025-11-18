@@ -25,7 +25,12 @@ app = FastAPI(
 # Configure CORS middleware for Chrome extension requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, use settings.allowed_origins
+    allow_origins=[
+        "*",  # Allow all origins (includes Chrome extensions)
+        "chrome-extension://*",  # Explicitly allow Chrome extensions
+        "http://localhost:*",  # Allow localhost
+        "http://127.0.0.1:*",  # Allow 127.0.0.1
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
