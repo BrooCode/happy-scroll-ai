@@ -1,0 +1,99 @@
+# Docker ignore file for HappyScroll API
+# Prevents unnecessary files from being copied to Docker image
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.manifest
+*.spec
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+README.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Project specific
+test_*.py
+tests/
+credentials/
+*.json
+!requirements.txt
+
+# Chrome Extension (not needed in backend)
+Happy Scroll AI/
+happy_scroll_UI/
+
+# Cache and temp files
+.cache/
+tmp/
+temp/
+*.tmp
+
+# Environment files (secrets should be in Secret Manager)
+.env.example
+.env.local
+.env.*.local
+
+# Misc
+Makefile
+setup.py
+pyproject.toml
