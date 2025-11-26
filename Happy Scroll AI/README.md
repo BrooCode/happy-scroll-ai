@@ -16,20 +16,28 @@ Automatically skips unsafe YouTube Shorts using AI-powered content moderation.
 
 ## 📋 Prerequisites
 
-Before installing the extension, make sure:
+Before installing the extension, make sure you have:
 
-1. **Happy Scroll AI API is running** on `http://localhost:8000`
-   ```bash
-   # Navigate to your API directory
-   cd d:\happy-scroll-ai
-   
-   # Start the API server
-   python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
+1. **Google Chrome** or **Microsoft Edge** browser (Chromium-based)
+2. The extension now uses the **production API** hosted on Google Cloud Run
+   - API URL: `https://happy-scroll-service-zjehvyppna-uc.a.run.app`
+   - ✅ No local setup required!
+   - ✅ Always available
+   - ✅ Auto-scaling
 
-2. **CORS is enabled** in your FastAPI backend (see instructions below)
+### Optional: Local Development
 
-3. **Google Chrome** or **Microsoft Edge** browser (Chromium-based)
+If you want to use a local API instead:
+```bash
+# Navigate to your API directory
+cd d:\happy-scroll-ai
+
+# Start the API server
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Update content.js line 10:
+const API_ENDPOINT = 'http://localhost:8000/api/happyScroll/v1/verdict';
+```
 
 ## 🚀 Installation Instructions
 
@@ -43,33 +51,7 @@ Before installing the extension, make sure:
    - `icon.png`
    - `README.md`
 
-### Step 2: Enable CORS in FastAPI Backend
-
-Update your FastAPI `main.py` to allow Chrome extension requests:
-
-```python
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI()
-
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "chrome-extension://*",  # Allow Chrome extensions
-        "http://localhost:*",     # Allow localhost
-        "http://127.0.0.1:*"     # Allow 127.0.0.1
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# ... rest of your API code
-```
-
-### Step 3: Load Extension in Chrome
+### Step 2: Load Extension in Chrome
 
 1. Open Google Chrome
 2. Navigate to: `chrome://extensions/`
@@ -78,7 +60,7 @@ app.add_middleware(
 5. Select the folder: `d:\happy-scroll-ai\Happy Scroll AI`
 6. The extension should now appear in your extensions list
 
-### Step 4: Verify Installation
+### Step 3: Verify Installation
 
 1. You should see "Happy Scroll AI" in your extensions
 2. Click the puzzle icon (🧩) in Chrome toolbar
@@ -87,22 +69,16 @@ app.add_middleware(
 
 ## 🎮 How to Use
 
-1. **Start your API server**:
-   ```bash
-   cd d:\happy-scroll-ai
-   python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-2. **Navigate to YouTube Shorts**:
+1. **Navigate to YouTube Shorts**:
    - Go to: https://www.youtube.com/shorts
    - Or open any specific Short video
 
-3. **Automatic Protection**:
+2. **Automatic Protection**:
    - The extension automatically checks each Short
    - If unsafe: automatically skips to next video
    - If safe: video plays normally
 
-4. **Monitor Activity** (Optional):
+3. **Monitor Activity** (Optional):
    - Right-click on the page → Inspect (or press F12)
    - Go to the **Console** tab
    - Look for `[Happy Scroll AI]` messages
@@ -153,7 +129,12 @@ Access to fetch at 'http://localhost:8000/...' has been blocked by CORS policy
 
 ### Change API Endpoint
 
-Edit `content.js` line 9:
+The extension is configured to use the production API:
+```javascript
+const API_ENDPOINT = 'https://happy-scroll-service-zjehvyppna-uc.a.run.app/api/happyScroll/v1/verdict';
+```
+
+For local development, edit `content.js` line 10:
 ```javascript
 const API_ENDPOINT = 'http://localhost:8000/api/happyScroll/v1/verdict';
 ```

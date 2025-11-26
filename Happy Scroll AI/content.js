@@ -6,7 +6,7 @@
  */
 
 // Configuration
-const API_ENDPOINT = 'http://localhost:8000/api/happyScroll/v1/verdict';
+const API_ENDPOINT = 'https://happy-scroll-service-zjehvyppna-uc.a.run.app/api/happyScroll/v1/verdict';
 const PAGE_LOAD_DELAY = 2000; // 2 seconds delay before checking
 const NEXT_BUTTON_SELECTORS = [
   'button[aria-label="Next video"]',
