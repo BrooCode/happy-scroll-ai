@@ -64,7 +64,7 @@ gcloud run deploy $SERVICE_NAME \
   --min-instances=0 \
   --max-instances=10 \
   --timeout=300 \
-  --set-secrets=YOUTUBE_API_KEY=youtube_api_key:latest,GOOGLE_VISION_KEY=google_vision_key:latest,GEMINI_KEY=gemini_key:latest \
+  --set-secrets=YOUTUBE_API_KEY=YOUTUBE_API_KEY:latest,GOOGLE_VISION_KEY=GOOGLE_VISION_KEY:latest,GEMINI_KEY=GEMINI_API_KEY:latest \
   --set-env-vars=REDIS_URL=$REDIS_URL
 
 echo ""

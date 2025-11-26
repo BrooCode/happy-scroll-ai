@@ -42,6 +42,25 @@ echo "🔍 Verifying secrets exist..."
 gcloud secrets list --project=happyscroll-478318
 
 echo ""
+echo "📝 Granting access to individual secrets..."
+
+# Grant access to each secret
+gcloud secrets add-iam-policy-binding YOUTUBE_API_KEY \
+  --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor" \
+  --project=happyscroll-478318
+
+gcloud secrets add-iam-policy-binding GOOGLE_VISION_KEY \
+  --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor" \
+  --project=happyscroll-478318
+
+gcloud secrets add-iam-policy-binding GEMINI_API_KEY \
+  --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor" \
+  --project=happyscroll-478318
+
+echo ""
 echo "🎉 Setup complete! Re-run your GitHub Actions workflow now."
 ```
 
