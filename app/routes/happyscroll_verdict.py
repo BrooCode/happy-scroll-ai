@@ -2,9 +2,12 @@
 HappyScroll Combined Verdict API Route
 Combines video transcript analysis and thumbnail moderation for comprehensive safety verdict.
 Uses parallel processing and caching for faster response times.
+
+Rate Limiting: Global 100 requests per day (demo version)
 """
 import asyncio
-from fastapi import APIRouter, HTTPException, status
+from datetime import datetime
+from fastapi import APIRouter, HTTPException, status, Request
 from loguru import logger
 
 from app.models.happyscroll_verdict import (
@@ -19,6 +22,49 @@ from app.core.config import settings
 
 
 router = APIRouter(prefix="/api/happyScroll/v1", tags=["HappyScroll Verdict"])
+
+
+# Global rate limiting (resets when server restarts or at midnight)
+GLOBAL_DAILY_LIMIT = 100  # Total API calls per day across all users
+GLOBAL_RESET_DATE = datetime.now().date()
+GLOBAL_REQUEST_COUNT = 0
+
+
+def check_global_limit():
+    """Check if global daily limit has been reached"""
+    global GLOBAL_REQUEST_COUNT, GLOBAL_RESET_DATE
+    
+    today = datetime.now().date()
+    
+    # Reset counter daily
+    if today > GLOBAL_RESET_DATE:
+        GLOBAL_REQUEST_COUNT = 0
+        GLOBAL_RESET_DATE = today
+        logger.info(f"🔄 Global rate limit reset for new day: {today}")
+    
+    # Check limit
+    if GLOBAL_REQUEST_COUNT >= GLOBAL_DAILY_LIMIT:
+        logger.warning(f"⚠️ Global daily limit reached: {GLOBAL_REQUEST_COUNT}/{GLOBAL_DAILY_LIMIT}")
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "error": "Daily limit exceeded",
+                "message": "Demo API has reached its daily limit. Please try again tomorrow!",
+                "info": "This is a demo project with limited free tier usage to manage costs.",
+                "limit": GLOBAL_DAILY_LIMIT,
+                "requests_today": GLOBAL_REQUEST_COUNT,
+                "note": "For unlimited usage, please deploy your own instance using the GitHub repository."
+            }
+        )
+    
+    GLOBAL_REQUEST_COUNT += 1
+    logger.info(f"📊 Global requests today: {GLOBAL_REQUEST_COUNT}/{GLOBAL_DAILY_LIMIT}")
+    
+    return {
+        "requests_today": GLOBAL_REQUEST_COUNT,
+        "limit": GLOBAL_DAILY_LIMIT,
+        "remaining": GLOBAL_DAILY_LIMIT - GLOBAL_REQUEST_COUNT
+    }
 
 
 @router.get(
@@ -124,6 +170,8 @@ async def get_video_verdict(request: HappyScrollVerdictRequest) -> HappyScrollVe
     """
     Get comprehensive safety verdict by analyzing both video transcript and thumbnail.
     
+    Rate Limited: 100 requests per day (demo version)
+    
     Args:
         request: HappyScrollVerdictRequest with video_url
         
@@ -131,12 +179,16 @@ async def get_video_verdict(request: HappyScrollVerdictRequest) -> HappyScrollVe
         HappyScrollVerdictResponse with combined safety analysis
         
     Raises:
-        HTTPException: 400 for invalid URL, 500 for processing errors
+        HTTPException: 400 for invalid URL, 429 for rate limit, 500 for processing errors
     """
+    # Check global rate limit
+    limit_info = check_global_limit()
+    
     video_url = request.video_url.strip()
     
     logger.info("=" * 80)
     logger.info(f"HappyScroll Verdict Request: {video_url}")
+    logger.info(f"📊 Rate Limit: {limit_info['requests_today']}/{limit_info['limit']} ({limit_info['remaining']} remaining)")
     logger.info("=" * 80)
     
     # Validate video URL
