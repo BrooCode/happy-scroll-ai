@@ -1,410 +1,817 @@
-# HappyScroll Moderation API
+# 🚀 Happy Scroll AI# HappyScroll Moderation API
 
-AI-powered content moderation backend for the HappyScroll Chrome extension. This API uses **Google Cloud Vision API** with SafeSearch detection to analyze and filter unsafe content in short-form videos.
 
-> **🔄 Recently Migrated**: This project has been migrated from OpenAI to Google Cloud Vision for better performance, reliability, and cost-effectiveness. See [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) for details.
 
-## Features
+**AI-powered YouTube Shorts content moderation for safer browsing.**AI-powered content moderation backend for the HappyScroll Chrome extension. This API uses **Google Cloud Vision API** with SafeSearch detection to analyze and filter unsafe content in short-form videos.
 
-- 🚀 **FastAPI Framework** - Modern, fast web framework with automatic API documentation
+
+
+Automatically analyzes and filters unsafe YouTube Shorts content using advanced AI and computer vision, protecting users from inappropriate videos.> **🔄 Recently Migrated**: This project has been migrated from OpenAI to Google Cloud Vision for better performance, reliability, and cost-effectiveness. See [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) for details.
+
+
+
+[![Deploy](https://img.shields.io/badge/Deploy-Google%20Cloud%20Run-4285F4?logo=google-cloud)](https://cloud.google.com/run)## Features
+
+[![API](https://img.shields.io/badge/API-Live-success)](https://happy-scroll-service-zjehvyppna-uc.a.run.app)
+
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)- 🚀 **FastAPI Framework** - Modern, fast web framework with automatic API documentation
+
 - 🔍 **Google Cloud Vision** - SafeSearch API for image content analysis
-- 🎯 **Configurable Safety** - Adjustable safety thresholds for different audiences
+
+---- 🎯 **Configurable Safety** - Adjustable safety thresholds for different audiences
+
 - 🔒 **CORS Support** - Configured for Chrome extension requests
-- 📝 **Type Safety** - Full type hints with Pydantic models
+
+## 📋 Overview- 📝 **Type Safety** - Full type hints with Pydantic models
+
 - 📊 **Structured Logging** - Enhanced logging with Loguru
-- 🐳 **Docker Support** - Containerized deployment ready
+
+**Happy Scroll AI** is a complete content moderation system consisting of:- 🐳 **Docker Support** - Containerized deployment ready
+
 - ✅ **Health Checks** - Built-in health monitoring endpoints
-- 💰 **Free Tier** - 1,000 moderations/month free with Google Cloud
 
-## Project Structure
+1. **FastAPI Backend** - Deployed on Google Cloud Run- 💰 **Free Tier** - 1,000 moderations/month free with Google Cloud
 
-```
-happy-scroll-ai/
+2. **Chrome Extension** - Auto-skips unsafe YouTube Shorts
+
+3. **AI Analysis** - Multi-layer safety checks using Gemini AI & Google Vision## Project Structure
+
+
+
+**Live Demo:** https://broocode.github.io/happy-scroll-ai/  ```
+
+**API Endpoint:** https://happy-scroll-service-zjehvyppna-uc.a.run.apphappy-scroll-ai/
+
 ├── app/
-│   ├── __init__.py
+
+---│   ├── __init__.py
+
 │   ├── main.py                       # FastAPI application entry point
-│   ├── core/
+
+## 🛠️ Technology Stack│   ├── core/
+
 │   │   ├── __init__.py
-│   │   ├── config.py                 # Environment configuration
-│   │   └── logger.py                 # Logging setup
-│   ├── models/
-│   │   ├── __init__.py
-│   │   └── moderation_request.py     # Pydantic models
-│   ├── routes/
-│   │   ├── __init__.py
-│   │   └── moderation.py             # API endpoints
-│   └── services/
-│       ├── __init__.py
-│       ├── google_vision_service.py  # Google Cloud Vision integration
+
+### **Backend Services**│   │   ├── config.py                 # Environment configuration
+
+| Service | Purpose | Provider |│   │   └── logger.py                 # Logging setup
+
+|---------|---------|----------|│   ├── models/
+
+| **Google Cloud Run** | Serverless API hosting | Google Cloud |│   │   ├── __init__.py
+
+| **Gemini AI API** | Video transcript analysis | Google AI |│   │   └── moderation_request.py     # Pydantic models
+
+| **Google Vision API** | Thumbnail safety detection | Google Cloud |│   ├── routes/
+
+| **YouTube Data API v3** | Video metadata & transcripts | Google Cloud |│   │   ├── __init__.py
+
+| **Redis Cloud** | Response caching (7-day TTL) | Redis Labs |│   │   └── moderation.py             # API endpoints
+
+| **Secret Manager** | Secure API key storage | Google Cloud |│   └── services/
+
+| **Artifact Registry** | Docker image storage | Google Cloud |│       ├── __init__.py
+
+| **GitHub Actions** | CI/CD automation | GitHub |│       ├── google_vision_service.py  # Google Cloud Vision integration
+
 │       └── google_video_service.py   # Google Video Intelligence (optional)
-├── tests/
-│   ├── __init__.py
-│   └── test_moderation.py            # Unit tests
-├── credentials/
-│   └── .gitkeep                      # Place service account key here
-├── .env.example                       # Environment variables template
+
+### **Application Stack**├── tests/
+
+- **Framework:** FastAPI 0.109.0 (Python 3.10+)│   ├── __init__.py
+
+- **Validation:** Pydantic 2.7.4│   └── test_moderation.py            # Unit tests
+
+- **Logging:** Loguru├── credentials/
+
+- **Deployment:** Docker + Cloud Run│   └── .gitkeep                      # Place service account key here
+
+- **Cache:** Redis 5.0.1├── .env.example                       # Environment variables template
+
 ├── .gitignore
-├── Dockerfile
-├── Makefile
-├── README.md
-├── GOOGLE_CLOUD_SETUP.md              # Setup guide for Google Cloud
+
+### **Chrome Extension**├── Dockerfile
+
+- **Manifest:** V3├── Makefile
+
+- **Storage:** chrome.storage.local├── README.md
+
+- **Permissions:** activeTab, scripting, storage├── GOOGLE_CLOUD_SETUP.md              # Setup guide for Google Cloud
+
 ├── MIGRATION_GUIDE.md                 # Migration from OpenAI guide
-├── requirements.txt
+
+---├── requirements.txt
+
 └── test_google_vision.py              # Test script for Google Cloud
-```
 
-## Prerequisites
+## ✨ Features```
 
-- Python 3.11+
-- Google Cloud account with Vision API enabled
-- Service account JSON key
+
+
+### **🔍 Multi-Layer Analysis**## Prerequisites
+
+- ✅ **Transcript Analysis** - AI checks video captions against 12 strict safety rules
+
+- ✅ **Thumbnail Moderation** - Computer vision detects inappropriate imagery- Python 3.11+
+
+- ✅ **Parallel Processing** - Both checks run simultaneously (~15-20s)- Google Cloud account with Vision API enabled
+
+- ✅ **Smart Caching** - 7-day cache for instant responses (<1s)- Service account JSON key
+
 - pip or Docker
 
-## Quick Start
+### **🛡️ Safety Features**
 
-### 1. Setup Google Cloud
+- ✅ Strict Indian parenting norms compliance## Quick Start
+
+- ✅ Filters: violence, adult content, profanity, dangerous acts
+
+- ✅ Automatic video skipping in Chrome extension### 1. Setup Google Cloud
+
+- ✅ Real-time console logging for transparency
 
 ⚠️ **Important**: Before running the API, you must set up Google Cloud Vision API.
 
-📖 **Detailed instructions**: See [GOOGLE_CLOUD_SETUP.md](GOOGLE_CLOUD_SETUP.md)
+### **⚡ Performance**
 
-**Quick steps**:
-1. Create Google Cloud project
+- ✅ **Cached Videos:** <1 second (instant)📖 **Detailed instructions**: See [GOOGLE_CLOUD_SETUP.md](GOOGLE_CLOUD_SETUP.md)
+
+- ✅ **New Videos:** 15-25 seconds (parallel analysis)
+
+- ✅ **Cache Hit Rate:** 60-80%**Quick steps**:
+
+- ✅ **Uptime:** 99.9% (Cloud Run)1. Create Google Cloud project
+
 2. Enable Vision API
-3. Create service account & download JSON key
-4. Place key in `credentials/service-account-key.json`
 
-### 2. Create Virtual Environment
+### **📊 Rate Limiting**3. Create service account & download JSON key
 
-```powershell
+- **Extension:** 8 videos per user per day4. Place key in `credentials/service-account-key.json`
+
+- **API:** 150 NEW analyses per day (cached videos excluded)
+
+- **Cost Protection:** Smart caching reduces API costs by 70%### 2. Create Virtual Environment
+
+
+
+---```powershell
+
 python -m venv venv
-.\venv\Scripts\activate  # Windows PowerShell
+
+## 🚀 Quick Start.\venv\Scripts\activate  # Windows PowerShell
+
 ```
+
+### **1. Prerequisites**
 
 ### 3. Install Dependencies
 
-```powershell
-pip install -r requirements.txt
+- Python 3.10+
+
+- Google Cloud account```powershell
+
+- Redis Cloud account (free tier)pip install -r requirements.txt
+
+- GitHub account (for deployment)```
+
+
+
+### **2. Clone Repository**### 4. Configure Environment
+
+
+
+```bashCopy `.env.example` to `.env` and configure:
+
+git clone https://github.com/BrooCode/happy-scroll-ai.git
+
+cd happy-scroll-ai```powershell
+
+```copy .env.example .env
+
 ```
 
-### 4. Configure Environment
-
-Copy `.env.example` to `.env` and configure:
-
-```powershell
-copy .env.example .env
-```
+### **3. Google Cloud Setup**
 
 Edit `.env`:
-```env
-# Google Cloud Configuration
-GOOGLE_APPLICATION_CREDENTIALS=d:\happy-scroll-ai\credentials\service-account-key.json
+
+```bash```env
+
+# Create project# Google Cloud Configuration
+
+gcloud projects create happyscroll-YOUR-IDGOOGLE_APPLICATION_CREDENTIALS=d:\happy-scroll-ai\credentials\service-account-key.json
+
 GOOGLE_CLOUD_PROJECT=your-project-id-here
 
-# Safety Threshold (UNKNOWN, VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY)
-SAFETY_THRESHOLD=POSSIBLE
+# Enable APIs
 
-# Application
-APP_ENV=dev
-PORT=8000
+gcloud services enable run.googleapis.com# Safety Threshold (UNKNOWN, VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY)
+
+gcloud services enable artifactregistry.googleapis.comSAFETY_THRESHOLD=POSSIBLE
+
+gcloud services enable secretmanager.googleapis.com
+
+gcloud services enable vision.googleapis.com# Application
+
+gcloud services enable youtube.googleapis.comAPP_ENV=dev
+
+```PORT=8000
+
 ```
+
+### **4. Set Up API Keys**
 
 ### 5. Test Google Cloud Setup
 
+Create secrets in Google Cloud Secret Manager:
+
 ```powershell
-python test_google_vision.py
-```
+
+```bashpython test_google_vision.py
+
+# YouTube Data API key```
+
+echo -n "YOUR_YOUTUBE_KEY" | gcloud secrets create YOUTUBE_API_KEY --data-file=-
 
 This will verify your credentials and test the Vision API.
 
-### 6. Run the Application
+# Google Vision API key
+
+echo -n "YOUR_VISION_KEY" | gcloud secrets create GOOGLE_VISION_KEY --data-file=-### 6. Run the Application
+
+
+
+# Gemini AI API key```powershell
+
+echo -n "YOUR_GEMINI_KEY" | gcloud secrets create GEMINI_API_KEY --data-file=-uvicorn app.main:app --reload
+
+``````
+
+
+
+### **5. Deploy to Cloud Run**Or use the Makefile:
 
 ```powershell
-uvicorn app.main:app --reload
-```
 
-Or use the Makefile:
-```powershell
-make dev
-```
+```bashmake dev
+
+# Using GitHub Actions (Recommended)```
+
+git push origin main
 
 The API will be available at:
-- **API**: http://localhost:8000
-- **Docs**: http://localhost:8000/docs (Interactive API documentation)
-- **ReDoc**: http://localhost:8000/redoc
 
-## API Usage
+# Or deploy manually- **API**: http://localhost:8000
 
-### Moderate Image Content
+gcloud run deploy happy-scroll-service \- **Docs**: http://localhost:8000/docs (Interactive API documentation)
 
-**Endpoint**: `POST /api/moderate`
+  --source . \- **ReDoc**: http://localhost:8000/redoc
 
-**Request**:
-```json
-{
-  "image_url": "https://i.ytimg.com/vi/VIDEO_ID/maxresdefault.jpg"
-}
+  --region us-central1 \
+
+  --allow-unauthenticated \## API Usage
+
+  --set-secrets=YOUTUBE_API_KEY=YOUTUBE_API_KEY:latest,GOOGLE_VISION_KEY=GOOGLE_VISION_KEY:latest,GEMINI_API_KEY=GEMINI_API_KEY:latest
+
+```### Moderate Image Content
+
+
+
+### **6. Install Chrome Extension****Endpoint**: `POST /api/moderate`
+
+
+
+1. Open Chrome → `chrome://extensions/`**Request**:
+
+2. Enable "Developer mode"```json
+
+3. Click "Load unpacked"{
+
+4. Select `Happy Scroll AI/` folder  "image_url": "https://i.ytimg.com/vi/VIDEO_ID/maxresdefault.jpg"
+
+5. Navigate to YouTube Shorts - extension auto-activates!}
+
 ```
 
+---
+
 **Response**:
-```json
+
+## 📡 API Documentation```json
+
 {
-  "allowed": true,
+
+### **Main Endpoint**  "allowed": true,
+
   "safe": true,
-  "categories": {
+
+**`POST /api/happyScroll/v1/verdict`**  "categories": {
+
     "adult": false,
-    "violence": false,
+
+Analyzes YouTube video for safety using parallel transcript + thumbnail checks.    "violence": false,
+
     "racy": false,
-    "medical": false,
-    "spoof": false
-  },
-  "likelihood_scores": {
-    "adult": "VERY_UNLIKELY",
-    "violence": "UNLIKELY",
+
+**Request:**    "medical": false,
+
+```json    "spoof": false
+
+{  },
+
+  "video_url": "https://www.youtube.com/watch?v=VIDEO_ID"  "likelihood_scores": {
+
+}    "adult": "VERY_UNLIKELY",
+
+```    "violence": "UNLIKELY",
+
     "racy": "VERY_UNLIKELY",
-    "medical": "UNLIKELY",
-    "spoof": "VERY_UNLIKELY"
-  },
-  "threshold": "POSSIBLE",
-  "service": "google_cloud_vision"
-}
-```
 
-### Example: Test with PowerShell
+**Response:**    "medical": "UNLIKELY",
 
-```powershell
-$body = @{
-    image_url = "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
-} | ConvertTo-Json
+```json    "spoof": "VERY_UNLIKELY"
 
-Invoke-RestMethod -Uri "http://localhost:8000/api/moderate" `
-    -Method Post `
-    -ContentType "application/json" `
-    -Body $body
-```
+{  },
 
-### Moderate Video (Optional)
+  "video_id": "VIDEO_ID",  "threshold": "POSSIBLE",
 
-**Endpoint**: `POST /api/moderate/video`
+  "video_title": "Video Title",  "service": "google_cloud_vision"
 
-**Note**: Video analysis is slow (1-5 minutes) and requires videos in Google Cloud Storage.
+  "channel_title": "Channel Name",}
 
-**Request**:
+  "is_safe": true,```
+
+  "overall_reason": "Video passed all safety checks",
+
+  "transcript_analysis": {### Example: Test with PowerShell
+
+    "is_safe": true,
+
+    "reason": "Content is appropriate"```powershell
+
+  },$body = @{
+
+  "thumbnail_analysis": {    image_url = "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
+
+    "is_safe": true,} | ConvertTo-Json
+
+    "reason": "No inappropriate content detected"
+
+  },Invoke-RestMethod -Uri "http://localhost:8000/api/moderate" `
+
+  "cached": false,    -Method Post `
+
+  "processing_time": 18.5    -ContentType "application/json" `
+
+}    -Body $body
+
+``````
+
+
+
+### **Other Endpoints**### Moderate Video (Optional)
+
+
+
+- **Health Check:** `GET /health`**Endpoint**: `POST /api/moderate/video`
+
+- **Cache Stats:** `GET /api/happyScroll/v1/cache/stats`
+
+- **API Docs:** `GET /docs` (Swagger UI)**Note**: Video analysis is slow (1-5 minutes) and requires videos in Google Cloud Storage.
+
+
+
+**Live API:** https://happy-scroll-service-zjehvyppna-uc.a.run.app/docs**Request**:
+
 ```json
-{
+
+---{
+
   "video_uri": "gs://your-bucket/video.mp4"
-}
+
+## 🏗️ Architecture}
+
 ```
 
-### Health Check
-
-**Endpoint**: `GET /api/health`
-
-**Response**:
-```json
-{
-  "status": "healthy",
-  "service": "HappyScroll Moderation API",
-  "version": "1.0.0"
-}
 ```
 
-## Testing
+┌─────────────────┐### Health Check
 
-Run the test suite:
+│  User Browser   │
 
-```bash
-pytest tests/ -v
-```
+│ YouTube Shorts  │**Endpoint**: `GET /api/health`
 
-Or using Make:
-```bash
-make test
-```
+└────────┬────────┘
 
-## Docker Deployment
+         │**Response**:
 
-### Build Image
+         ├─────────────────────────────────┐```json
 
-```bash
-docker build -t happyscroll-api:latest .
-```
+         │                                 │{
 
-Or:
-```bash
+┌────────▼────────┐              ┌────────▼─────────┐  "status": "healthy",
+
+│ Chrome Extension│              │   GitHub Pages   │  "service": "HappyScroll Moderation API",
+
+│  (Rate Limited) │              │   Landing Page   │  "version": "1.0.0"
+
+│   8 videos/day  │              └──────────────────┘}
+
+└────────┬────────┘```
+
+         │ HTTPS POST
+
+         │## Testing
+
+┌────────▼─────────────────────────────────┐
+
+│       Google Cloud Run                   │Run the test suite:
+
+│   FastAPI Backend (Python)               │
+
+│   • Rate Limiting: 150 NEW/day           │```bash
+
+│   • Auto-scaling: 0-100 instances        │pytest tests/ -v
+
+│   • Region: us-central1                  │```
+
+└────┬─────────────┬──────────┬────────────┘
+
+     │             │          │Or using Make:
+
+     │             │          │```bash
+
+┌────▼──────┐ ┌────▼─────┐ ┌─▼────────────┐make test
+
+│ Redis     │ │ Gemini   │ │ Google Cloud │```
+
+│ Cloud     │ │ AI API   │ │ Vision API   │
+
+│ (Cache)   │ │          │ │              │## Docker Deployment
+
+└───────────┘ └──────────┘ └──────────────┘
+
+     │             │               │### Build Image
+
+     └─────────────┴───────────────┘
+
+                   │```bash
+
+          ┌────────▼──────────┐docker build -t happyscroll-api:latest .
+
+          │  YouTube Data API │```
+
+          │  (Transcripts)    │
+
+          └───────────────────┘Or:
+
+``````bash
+
 make docker-build
-```
 
-### Run Container
+---```
 
-```bash
+
+
+## 💰 Cost Breakdown### Run Container
+
+
+
+### **Monthly Costs (Demo Usage)**```bash
+
 docker run -p 8000:8000 --env-file .env happyscroll-api:latest
-```
 
-Or:
-```bash
-make docker-run
-```
+| Service | Usage | Cost |```
 
-## Cloud Deployment
+|---------|-------|------|
 
-### 🚀 Deploy to Google Cloud Run (Recommended)
+| **Cloud Run** | 150 requests/day | ~$1-2 |Or:
 
-Google Cloud Run is the recommended production deployment platform for this API. It offers:
+| **Gemini AI** | 150 analyses/day | ~$3-5 |```bash
+
+| **Google Vision** | 150 analyses/day | ~$4-6 |make docker-run
+
+| **YouTube API** | 150 requests/day | FREE (quota) |```
+
+| **Redis Cloud** | Free tier | $0 |
+
+| **Secret Manager** | 3 secrets | <$1 |## Cloud Deployment
+
+| **Artifact Registry** | 1 image | <$1 |
+
+| **GitHub Actions** | CI/CD | FREE |### 🚀 Deploy to Google Cloud Run (Recommended)
+
+| **GitHub Pages** | Static site | FREE |
+
+| **TOTAL** | | **~$10-15/month** |Google Cloud Run is the recommended production deployment platform for this API. It offers:
+
 - ✅ **Serverless** - Pay only when your API is used (scale to zero)
-- ✅ **Auto-scaling** - Handles traffic spikes automatically
-- ✅ **Native Integration** - Works seamlessly with Google Cloud Vision API
-- ✅ **Secret Manager** - Secure API key storage
-- ✅ **Fast Cold Starts** - Optimized Docker image
+
+**With Cache Optimization (70% hit rate):**- ✅ **Auto-scaling** - Handles traffic spikes automatically
+
+- Effective capacity: ~500 checks/day- ✅ **Native Integration** - Works seamlessly with Google Cloud Vision API
+
+- Actual cost: Same (~$10-15)- ✅ **Secret Manager** - Secure API key storage
+
+- Cost per check: $0.001 (vs $0.003 without cache)- ✅ **Fast Cold Starts** - Optimized Docker image
+
 - ✅ **Free Tier** - 2 million requests/month free
+
+---
 
 #### Prerequisites
 
+## 📊 Performance Metrics
+
 Before deploying, ensure you have:
 
-1. **Google Cloud Project** with billing enabled
-2. **Service Account** with the following roles:
-   - Cloud Run Admin
-   - Artifact Registry Writer
-   - Cloud Build Editor
-   - Service Account User
-   - Secret Manager Secret Accessor
-3. **APIs Enabled**:
+| Metric | Value |
+
+|--------|-------|1. **Google Cloud Project** with billing enabled
+
+| **Cold Start** | ~3-5 seconds |2. **Service Account** with the following roles:
+
+| **Warm Response (Cached)** | <1 second |   - Cloud Run Admin
+
+| **Warm Response (New)** | 15-25 seconds |   - Artifact Registry Writer
+
+| **Cache Hit Rate** | 60-80% |   - Cloud Build Editor
+
+| **API Uptime** | 99.9% |   - Service Account User
+
+| **Max Concurrency** | 100 instances |   - Secret Manager Secret Accessor
+
+| **Memory Usage** | ~512MB per instance |3. **APIs Enabled**:
+
    - Cloud Run API
-   - Artifact Registry API
+
+---   - Artifact Registry API
+
    - Cloud Build API
-   - Secret Manager API
+
+## 🛡️ Safety Rules   - Secret Manager API
+
    - Cloud Vision API
-4. **Artifact Registry Repository** created:
+
+The API enforces **12 strict safety rules** based on Indian parenting norms:4. **Artifact Registry Repository** created:
+
    ```bash
-   gcloud artifacts repositories create happy-scroll-api \
-     --repository-format=docker \
-     --location=us-central1 \
-     --description="HappyScroll API Docker images"
-   ```
 
-#### Setup Secrets in Secret Manager
+1. ❌ Violence or physical harm   gcloud artifacts repositories create happy-scroll-api \
 
-Store your API keys securely in Google Cloud Secret Manager:
+2. ❌ Adult or sexual content     --repository-format=docker \
 
-```bash
-# Store YouTube API Key
+3. ❌ Profanity or vulgar language     --location=us-central1 \
+
+4. ❌ Dangerous challenges/pranks     --description="HappyScroll API Docker images"
+
+5. ❌ Substance abuse   ```
+
+6. ❌ Bullying or harassment
+
+7. ❌ Hate speech or discrimination#### Setup Secrets in Secret Manager
+
+8. ❌ Scary or disturbing content
+
+9. ❌ Inappropriate relationshipsStore your API keys securely in Google Cloud Secret Manager:
+
+10. ❌ Gambling or illegal activities
+
+11. ❌ Misinformation or conspiracy theories```bash
+
+12. ❌ Privacy violations# Store YouTube API Key
+
 echo -n "your-youtube-api-key" | gcloud secrets create youtube_api_key \
-  --data-file=- \
+
+---  --data-file=- \
+
   --replication-policy="automatic"
+
+## 🔧 Configuration
 
 # Store Google Vision API Key (or use service account)
-echo -n "your-google-vision-key" | gcloud secrets create google_vision_key \
+
+### **Environment Variables**echo -n "your-google-vision-key" | gcloud secrets create google_vision_key \
+
   --data-file=- \
+
+```env  --replication-policy="automatic"
+
+# API Keys (stored in Secret Manager)
+
+YOUTUBE_API_KEY=your_key_here# Store Gemini API Key
+
+GOOGLE_VISION_KEY=your_key_hereecho -n "your-gemini-api-key" | gcloud secrets create gemini_key \
+
+GEMINI_API_KEY=your_key_here  --data-file=- \
+
   --replication-policy="automatic"
 
-# Store Gemini API Key
-echo -n "your-gemini-api-key" | gcloud secrets create gemini_key \
-  --data-file=- \
-  --replication-policy="automatic"
-```
+# Redis Cache```
+
+REDIS_URL=redis://user:pass@host:port
 
 #### Option 1: Automated Deployment with GitHub Actions
 
-**1. Add GitHub Secrets**
+# Application
 
-Go to your GitHub repository → Settings → Secrets and variables → Actions, and add:
+APP_ENV=production**1. Add GitHub Secrets**
 
-- `GCP_PROJECT_ID`: Your Google Cloud project ID
+PORT=8080
+
+```Go to your GitHub repository → Settings → Secrets and variables → Actions, and add:
+
+
+
+### **Rate Limits (Adjustable)**- `GCP_PROJECT_ID`: Your Google Cloud project ID
+
 - `GCP_SA_KEY`: Service account JSON key (entire content)
-- `REDIS_URL`: Your Redis connection URL (if using external Redis)
 
-**2. Push to Main Branch**
+**Extension:** `Happy Scroll AI/content.js`- `REDIS_URL`: Your Redis connection URL (if using external Redis)
+
+```javascript
+
+const MAX_VIDEOS_PER_DAY = 8;  // Change as needed**2. Push to Main Branch**
+
+```
 
 The GitHub Actions workflow (`.github/workflows/deploy.yaml`) will automatically:
-- Build the Docker image
-- Push to Artifact Registry
-- Deploy to Cloud Run
-- Configure secrets from Secret Manager
 
-```bash
+**API:** `app/routes/happyscroll_verdict.py`- Build the Docker image
+
+```python- Push to Artifact Registry
+
+GLOBAL_DAILY_LIMIT = 150  # Change as needed- Deploy to Cloud Run
+
+```- Configure secrets from Secret Manager
+
+
+
+---```bash
+
 git add .
-git commit -m "Deploy to Cloud Run"
+
+## 📖 Documentationgit commit -m "Deploy to Cloud Run"
+
 git push origin main
-```
 
-**3. Monitor Deployment**
+- **[API Examples](API_EXAMPLES.md)** - Code samples for using the API```
 
-Check the Actions tab in your GitHub repository to monitor the deployment progress.
+- **[Chrome Extension Setup](CHROME_EXTENSION_SETUP.md)** - Extension installation guide
 
-#### Option 2: Manual Deployment
+- **[Chrome Web Store Guide](CHROME_WEB_STORE_GUIDE.md)** - Publishing to Chrome Web Store**3. Monitor Deployment**
 
-**For Windows (PowerShell)**:
+- **[Rate Limit Documentation](RATE_LIMIT_DOCUMENTATION.md)** - Detailed rate limiting info
 
-```powershell
+- **[Quickstart Guide](QUICKSTART.md)** - Fast setup for developersCheck the Actions tab in your GitHub repository to monitor the deployment progress.
+
+
+
+---#### Option 2: Manual Deployment
+
+
+
+## 🧪 Testing**For Windows (PowerShell)**:
+
+
+
+### **Test API Locally**```powershell
+
 # Set environment variables
-$env:GCP_PROJECT_ID="your-project-id"
-$env:REDIS_URL="your-redis-url"
+
+```bash$env:GCP_PROJECT_ID="your-project-id"
+
+# Install dependencies$env:REDIS_URL="your-redis-url"
+
+pip install -r requirements.txt
 
 # Run deployment script
-.\deploy.bat
-```
 
-**For Linux/Mac (Bash)**:
+# Run server.\deploy.bat
 
-```bash
-# Set environment variables
-export GCP_PROJECT_ID="your-project-id"
+uvicorn app.main:app --reload```
+
+
+
+# Test endpoint**For Linux/Mac (Bash)**:
+
+curl -X POST "http://localhost:8000/api/happyScroll/v1/verdict" \
+
+  -H "Content-Type: application/json" \```bash
+
+  -d '{"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}'# Set environment variables
+
+```export GCP_PROJECT_ID="your-project-id"
+
 export REDIS_URL="your-redis-url"
 
-# Make script executable
-chmod +x deploy.sh
+### **Test Chrome Extension**
 
-# Run deployment script
-./deploy.sh
+# Make script executable
+
+1. Load extension in Chromechmod +x deploy.sh
+
+2. Open YouTube Shorts
+
+3. Check console (F12) for logs# Run deployment script
+
+4. Verify unsafe videos are auto-skipped./deploy.sh
+
 ```
+
+---
 
 **Or use gcloud CLI directly**:
 
+## 🤝 Contributing
+
 ```bash
-# 1. Authenticate
+
+Contributions welcome! Please:# 1. Authenticate
+
 gcloud auth login
 
-# 2. Set project
-gcloud config set project YOUR_PROJECT_ID
+1. Fork the repository
+
+2. Create a feature branch# 2. Set project
+
+3. Make your changesgcloud config set project YOUR_PROJECT_ID
+
+4. Submit a pull request
 
 # 3. Build and push Docker image
-docker build -t us-central1-docker.pkg.dev/YOUR_PROJECT_ID/happy-scroll-api/happyscroll-api:latest .
-gcloud auth configure-docker us-central1-docker.pkg.dev
-docker push us-central1-docker.pkg.dev/YOUR_PROJECT_ID/happy-scroll-api/happyscroll-api:latest
 
-# 4. Deploy to Cloud Run
+---docker build -t us-central1-docker.pkg.dev/YOUR_PROJECT_ID/happy-scroll-api/happyscroll-api:latest .
+
+gcloud auth configure-docker us-central1-docker.pkg.dev
+
+## 📄 Licensedocker push us-central1-docker.pkg.dev/YOUR_PROJECT_ID/happy-scroll-api/happyscroll-api:latest
+
+
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.# 4. Deploy to Cloud Run
+
 gcloud run deploy happy-scroll-service \
-  --image=us-central1-docker.pkg.dev/YOUR_PROJECT_ID/happy-scroll-api/happyscroll-api:latest \
+
+---  --image=us-central1-docker.pkg.dev/YOUR_PROJECT_ID/happy-scroll-api/happyscroll-api:latest \
+
   --platform=managed \
-  --region=us-central1 \
+
+## 👨‍💻 Author  --region=us-central1 \
+
   --allow-unauthenticated \
-  --port=8080 \
+
+**BrooCode**  --port=8080 \
+
   --memory=512Mi \
-  --cpu=1 \
-  --min-instances=0 \
+
+- GitHub: [@BrooCode](https://github.com/BrooCode)  --cpu=1 \
+
+- Project: [happy-scroll-ai](https://github.com/BrooCode/happy-scroll-ai)  --min-instances=0 \
+
   --max-instances=10 \
-  --timeout=300 \
+
+---  --timeout=300 \
+
   --set-secrets=YOUTUBE_API_KEY=youtube_api_key:latest,GOOGLE_VISION_KEY=google_vision_key:latest,GEMINI_KEY=gemini_key:latest \
-  --set-env-vars=REDIS_URL=YOUR_REDIS_URL
+
+## 🙏 Acknowledgments  --set-env-vars=REDIS_URL=YOUR_REDIS_URL
+
 ```
 
-#### Testing Your Deployment
+- **Google Cloud Platform** - Cloud Run, Vision API, Secret Manager
 
-After deployment, test your API:
+- **Google AI** - Gemini AI for transcript analysis#### Testing Your Deployment
+
+- **Redis Labs** - Free Redis Cloud tier
+
+- **FastAPI** - Modern Python web frameworkAfter deployment, test your API:
+
+- **YouTube** - Data API for video metadata
 
 ```powershell
-# Get your service URL
-$SERVICE_URL = gcloud run services describe happy-scroll-service `
-  --platform=managed `
-  --region=us-central1 `
-  --format="value(status.url)"
 
-# Test the health endpoint
+---# Get your service URL
+
+$SERVICE_URL = gcloud run services describe happy-scroll-service `
+
+## 📞 Support  --platform=managed `
+
+  --region=us-central1 `
+
+- **Issues:** [GitHub Issues](https://github.com/BrooCode/happy-scroll-ai/issues)  --format="value(status.url)"
+
+- **Demo:** https://broocode.github.io/happy-scroll-ai/
+
+- **API:** https://happy-scroll-service-zjehvyppna-uc.a.run.app/docs# Test the health endpoint
+
 Invoke-RestMethod -Uri "$SERVICE_URL/api/health"
 
+---
+
 # Test the verdict endpoint
-$body = @{
+
+**Made with ❤️ for safer browsing**$body = @{
+
     video_url = "https://youtube.com/shorts/example"
 } | ConvertTo-Json
 
