@@ -70,12 +70,14 @@ python test_youtube_moderation.py
 
 ---
 
-## 🔑 Environment Variables (Already Configured)
+## 🔑 Environment Variables (Required Configuration)
 ```properties
-YOUTUBE_API_KEY=***YOUTUBE_KEY_REMOVED*** ✅
-GOOGLE_APPLICATION_CREDENTIALS=D:\happy-scroll-ai\happyscroll-478318-6a860e981468.json ✅
-GEMINI_API_KEY=***GEMINI_KEY_REMOVED*** ✅
+YOUTUBE_API_KEY=your_youtube_api_key_here
+GOOGLE_APPLICATION_CREDENTIALS=path/to/your/service-account-key.json
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
+
+> **Note**: Never commit real API keys to git. Use Secret Manager for production.
 
 ---
 
