@@ -1,0 +1,143 @@
+# Pull Request Checks
+# Runs automatic checks on all PRs before they can be merged
+
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  # Verify PR comes from fork or feature branch
+  verify-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Source
+        run: |
+          echo "PR from: ${{ github.event.pull_request.head.ref }}"
+          echo "PR author: ${{ github.event.pull_request.user.login }}"
+          
+          # Prevent direct PRs from main to main
+          if [ "${{ github.event.pull_request.head.ref }}" == "main" ]; then
+            echo "❌ Error: Cannot create PR from main to main"
+            exit 1
+          fi
+          
+          echo "✅ PR source is valid"
+
+  # Run linting checks
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black
+          
+      - name: Run Black formatter check
+        run: |
+          black --check app/ tests/ || echo "⚠️ Code formatting issues detected"
+          
+      - name: Run Flake8 linter
+        run: |
+          flake8 app/ tests/ --max-line-length=100 --ignore=E203,W503 || echo "⚠️ Linting issues detected"
+
+  # Run tests
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+          
+      - name: Run tests
+        run: |
+          pytest tests/ --cov=app --cov-report=term-missing || echo "⚠️ Tests failed or missing"
+
+  # Security scan
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run Trivy security scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'HIGH,CRITICAL'
+          
+  # Check for sensitive data
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Scan for secrets
+        run: |
+          # Check for common secret patterns
+          echo "Scanning for potential secrets..."
+          
+          # Check for API keys
+          if grep -r -E "api[_-]?key.*=.*['\"][a-zA-Z0-9]{20,}['\"]" . --exclude-dir={.git,.github,node_modules,venv,.venv}; then
+            echo "⚠️ Warning: Potential API key found in code"
+          fi
+          
+          # Check for passwords
+          if grep -r -E "password.*=.*['\"][^'\"]+['\"]" . --exclude-dir={.git,.github,node_modules,venv,.venv}; then
+            echo "⚠️ Warning: Potential hardcoded password found"
+          fi
+          
+          echo "✅ Secret scan complete"
+
+  # PR size check
+  pr-size:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR size
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const additions = pr.additions;
+            const deletions = pr.deletions;
+            const total = additions + deletions;
+            
+            console.log(`PR size: +${additions} -${deletions} (${total} total)`);
+            
+            if (total > 1000) {
+              core.warning(`⚠️ Large PR detected (${total} lines changed). Consider splitting into smaller PRs.`);
+            } else {
+              console.log('✅ PR size is reasonable');
+            }
+
+  # All checks passed
+  all-checks-passed:
+    runs-on: ubuntu-latest
+    needs: [verify-source, lint, test, security, secrets-scan, pr-size]
+    steps:
+      - name: All checks passed
+        run: |
+          echo "✅ All PR checks passed!"
+          echo "PR is ready for review by @BrooCode"

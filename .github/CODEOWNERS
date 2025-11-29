@@ -1,0 +1,16 @@
+# Code Owners - Only BrooCode can approve and merge changes
+
+# Default owner for everything in the repo
+* @BrooCode
+
+# Specific critical files
+/.github/* @BrooCode
+/app/* @BrooCode
+/Dockerfile @BrooCode
+/requirements.txt @BrooCode
+/deploy.sh @BrooCode
+/deploy.bat @BrooCode
+/.github/workflows/* @BrooCode
+
+# Chrome Extension
+/Happy?Scroll?AI/* @BrooCode
