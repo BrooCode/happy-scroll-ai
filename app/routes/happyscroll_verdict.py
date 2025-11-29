@@ -3,7 +3,7 @@ HappyScroll Combined Verdict API Route
 Combines video transcript analysis and thumbnail moderation for comprehensive safety verdict.
 Uses parallel processing and caching for faster response times.
 
-Rate Limiting: Global 100 requests per day (demo version)
+Rate Limiting: 150 NEW video analyses per day (cached videos excluded) - Demo version
 """
 import asyncio
 from datetime import datetime
@@ -25,13 +25,22 @@ router = APIRouter(prefix="/api/happyScroll/v1", tags=["HappyScroll Verdict"])
 
 
 # Global rate limiting (resets when server restarts or at midnight)
-GLOBAL_DAILY_LIMIT = 100  # Total API calls per day across all users
+# Only counts NEW video analysis (excludes cached results)
+GLOBAL_DAILY_LIMIT = 150  # Total NEW video analyses per day across all users
 GLOBAL_RESET_DATE = datetime.now().date()
 GLOBAL_REQUEST_COUNT = 0
 
 
-def check_global_limit():
-    """Check if global daily limit has been reached"""
+def check_global_limit(increment: bool = False):
+    """
+    Check if global daily limit has been reached
+    
+    Args:
+        increment: If True, increment the counter (use for new video analysis only)
+    
+    Returns:
+        dict: Rate limit information
+    """
     global GLOBAL_REQUEST_COUNT, GLOBAL_RESET_DATE
     
     today = datetime.now().date()
@@ -42,23 +51,25 @@ def check_global_limit():
         GLOBAL_RESET_DATE = today
         logger.info(f"🔄 Global rate limit reset for new day: {today}")
     
-    # Check limit
+    # Check limit (before incrementing)
     if GLOBAL_REQUEST_COUNT >= GLOBAL_DAILY_LIMIT:
         logger.warning(f"⚠️ Global daily limit reached: {GLOBAL_REQUEST_COUNT}/{GLOBAL_DAILY_LIMIT}")
         raise HTTPException(
             status_code=429,
             detail={
                 "error": "Daily limit exceeded",
-                "message": "Demo API has reached its daily limit. Please try again tomorrow!",
+                "message": "Demo API has reached its daily limit for new video analysis. Please try again tomorrow!",
                 "info": "This is a demo project with limited free tier usage to manage costs.",
+                "note": "Cached videos do not count toward the limit. For unlimited usage, deploy your own instance.",
                 "limit": GLOBAL_DAILY_LIMIT,
-                "requests_today": GLOBAL_REQUEST_COUNT,
-                "note": "For unlimited usage, please deploy your own instance using the GitHub repository."
+                "requests_today": GLOBAL_REQUEST_COUNT
             }
         )
     
-    GLOBAL_REQUEST_COUNT += 1
-    logger.info(f"📊 Global requests today: {GLOBAL_REQUEST_COUNT}/{GLOBAL_DAILY_LIMIT}")
+    # Increment only if requested (for new video analysis)
+    if increment:
+        GLOBAL_REQUEST_COUNT += 1
+        logger.info(f"📊 NEW video analyses today: {GLOBAL_REQUEST_COUNT}/{GLOBAL_DAILY_LIMIT}")
     
     return {
         "requests_today": GLOBAL_REQUEST_COUNT,
@@ -170,7 +181,7 @@ async def get_video_verdict(request: HappyScrollVerdictRequest) -> HappyScrollVe
     """
     Get comprehensive safety verdict by analyzing both video transcript and thumbnail.
     
-    Rate Limited: 100 requests per day (demo version)
+    Rate Limited: 150 NEW video analyses per day (cached videos don't count)
     
     Args:
         request: HappyScrollVerdictRequest with video_url
@@ -181,14 +192,14 @@ async def get_video_verdict(request: HappyScrollVerdictRequest) -> HappyScrollVe
     Raises:
         HTTPException: 400 for invalid URL, 429 for rate limit, 500 for processing errors
     """
-    # Check global rate limit
-    limit_info = check_global_limit()
+    # Check rate limit (don't increment yet - only increment on cache MISS)
+    limit_info = check_global_limit(increment=False)
     
     video_url = request.video_url.strip()
     
     logger.info("=" * 80)
     logger.info(f"HappyScroll Verdict Request: {video_url}")
-    logger.info(f"📊 Rate Limit: {limit_info['requests_today']}/{limit_info['limit']} ({limit_info['remaining']} remaining)")
+    logger.info(f"📊 Rate Limit: {limit_info['requests_today']}/{limit_info['limit']} NEW videos ({limit_info['remaining']} remaining)")
     logger.info("=" * 80)
     
     # Validate video URL
@@ -228,9 +239,16 @@ async def get_video_verdict(request: HappyScrollVerdictRequest) -> HappyScrollVe
     
     if cached_result:
         logger.info("✅ CACHE HIT! Returning cached result (saved ~20 seconds)")
+        logger.info("📊 Cache hit does NOT count toward rate limit")
         return HappyScrollVerdictResponse(**cached_result)
     
     logger.info("💫 Cache MISS - Performing full analysis...")
+    
+    # =====================================
+    # INCREMENT RATE LIMIT COUNTER (only for new video analysis)
+    # =====================================
+    limit_info = check_global_limit(increment=True)
+    logger.info(f"📈 Incremented rate limit counter: {limit_info['requests_today']}/{limit_info['limit']}")
     
     # Initialize variables
     transcript_safe = False

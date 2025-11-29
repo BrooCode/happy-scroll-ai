@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Happy Scroll AI - Background Service Worker
  * 
  * This service worker handles extension lifecycle events and can be extended

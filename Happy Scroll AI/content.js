@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Happy Scroll AI - Content Script
  * 
  * This script runs on YouTube pages and automatically skips unsafe YouTube Shorts
@@ -51,7 +51,7 @@ async function checkVideoLimit() {
 }
 
 /**
- * Increment video count after successful check
+ * Increment video count after successful API call
  */
 async function incrementVideoCount() {
   const stored = await chrome.storage.local.get([STORAGE_KEY]);
@@ -61,7 +61,7 @@ async function incrementVideoCount() {
 }
 
 /**
- * Show rate limit message to user
+ * Show limit reached message to user
  */
 function showLimitMessage() {
   // Remove any existing banner
@@ -73,7 +73,7 @@ function showLimitMessage() {
   // Create a banner on the page
   const banner = document.createElement('div');
   banner.id = 'happyscroll-limit-banner';
-  banner.style.cssText = +""+
+  banner.style.cssText = `
     position: fixed;
     top: 80px;
     left: 50%;
@@ -88,22 +88,22 @@ function showLimitMessage() {
     text-align: center;
     max-width: 500px;
     animation: slideDown 0.3s ease-out;
-  +""+;
-  banner.innerHTML = +""+
-    <div style="font-size: 24px; margin-bottom: 8px;"></div>
+  `;
+  banner.innerHTML = `
+    <div style="font-size: 24px; margin-bottom: 8px;">⚠️</div>
     <strong style="font-size: 18px; display: block; margin-bottom: 8px;">Happy Scroll AI - Daily Limit Reached</strong>
     <span style="font-size: 14px; opacity: 0.9;">
-      You've checked  videos today.<br>
-      Come back tomorrow for more safe browsing! 
+      You've checked ${MAX_VIDEOS_PER_DAY} videos today.<br>
+      Come back tomorrow for more safe browsing! 🚀
     </span>
     <div style="margin-top: 12px; font-size: 12px; opacity: 0.7;">
       This is a demo project with limited free API usage.
     </div>
-  +""+;
+  `;
   
   // Add animation
   const style = document.createElement('style');
-  style.textContent = +""+
+  style.textContent = `
     @keyframes slideDown {
       from {
         opacity: 0;
@@ -114,7 +114,7 @@ function showLimitMessage() {
         transform: translateX(-50%) translateY(0);
       }
     }
-  +""+;
+  `;
   document.head.appendChild(style);
   
   document.body.appendChild(banner);
@@ -145,20 +145,20 @@ function isYouTubeShorts() {
  * Fetch safety verdict from API with rate limiting
  */
 async function checkVideoSafety(videoId) {
-  // Check limit first
+  // Check rate limit first
   const limitCheck = await checkVideoLimit();
   
   if (!limitCheck.allowed) {
-    console.log(+""+[Happy Scroll AI]  Daily limit reached (/ videos)+""+);
+    console.log(`[Happy Scroll AI] ⚠️ Daily limit reached (${limitCheck.count}/${MAX_VIDEOS_PER_DAY} videos)`);
     showLimitMessage();
-    return null; // Don't check the video
+    return null;
   }
   
   try {
-    console.log(+""+[Happy Scroll AI]  Checking video safety (/)...+""+);
-    console.log(+""+[Happy Scroll AI] Checking safety for video: +""+);
+    console.log(`[Happy Scroll AI] 🔍 Checking video safety (${limitCheck.count + 1}/${MAX_VIDEOS_PER_DAY})...`);
+    console.log(`[Happy Scroll AI] Checking safety for video: ${videoId}`);
     
-    const videoUrl = +""+https://www.youtube.com/watch?v=+""+;
+    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
       headers: {
@@ -171,7 +171,7 @@ async function checkVideoSafety(videoId) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(+""+[Happy Scroll AI]  API Error :+""+, errorText);
+      console.error(`[Happy Scroll AI] ❌ API Error ${response.status}:`, errorText);
       
       // Handle rate limit from backend
       if (response.status === 429) {
@@ -182,11 +182,11 @@ async function checkVideoSafety(videoId) {
     }
 
     const data = await response.json();
-    console.log('[Happy Scroll AI] API Response:', data);
+    console.log('[Happy Scroll AI] 📊 API Response:', data);
     
     // Increment counter after successful API call
     const newCount = await incrementVideoCount();
-    console.log(+""+[Happy Scroll AI]  Videos checked today: /+""+);
+    console.log(`[Happy Scroll AI] 📈 Videos checked today: ${newCount}/${MAX_VIDEOS_PER_DAY}`);
     
     return data;
   } catch (error) {
@@ -244,17 +244,16 @@ async function checkAndSkipIfUnsafe() {
     // Check video safety
     const verdict = await checkVideoSafety(videoId);
 
-    // If null is returned, rate limit was hit or error occurred
-    if (verdict === null) {
-      console.log('[Happy Scroll AI]  Skipping check - rate limit or error');
-    } else if (verdict.is_safe === false) {
-      console.log(+""+[Happy Scroll AI]  UNSAFE VIDEO DETECTED - Skipping to next Short+""+);
-      console.log(+""+[Happy Scroll AI] Reason: +""+);
+    if (verdict && verdict.is_safe === false) {
+      console.log(`[Happy Scroll AI] ΓÜá∩╕Å UNSAFE VIDEO DETECTED - Skipping to next Short`);
+      console.log(`[Happy Scroll AI] Reason: ${verdict.reasons || 'No reason provided'}`);
       
       // Skip to next video
       clickNextButton();
-    } else if (verdict.is_safe === true) {
-      console.log(+""+[Happy Scroll AI]  Video is SAFE - Continuing playback+""+);
+    } else if (verdict && verdict.is_safe === true) {
+      console.log(`[Happy Scroll AI] Γ£à Video is SAFE - Continuing playback`);
+    } else {
+      console.log(`[Happy Scroll AI] ΓÜá∩╕Å Unable to determine safety - Allowing video`);
     }
   } catch (error) {
     console.error('[Happy Scroll AI] Error during safety check:', error);
@@ -268,7 +267,6 @@ async function checkAndSkipIfUnsafe() {
  */
 function initialize() {
   console.log('[Happy Scroll AI] Extension initialized');
-  console.log(+""+[Happy Scroll AI]  Rate limit:  videos per day+""+);
 
   // Check on initial load
   if (isYouTubeShorts()) {
